@@ -3,10 +3,21 @@ import numpy as np
 
 # Example dataset
 text = """
-hello world. how are you today? hello again. the world is beautiful.
-hello world. how are you today? hello again. the world is beautiful.
-hello world. how are you today? hello again. the world is beautiful.
-hello world. how are you today? hello again. the world is beautiful.
+The sun is shining brightly today.,
+I went to the market and bought some fresh vegetables.,
+The sky is clear and blue with a few fluffy clouds.,
+I love reading books in my spare time.,
+Today is a perfect day for a walk in the park.,
+The coffee is hot and smells wonderful.,
+I am excited about the upcoming weekend.,
+The birds are chirping and singing sweetly.,
+I enjoy spending time with my family and friends.,
+The gentle breeze feels refreshing and cool.,
+The garden is full of blooming flowers and vibrant colors.,
+I am planning to try a new recipe for dinner tonight.,
+The sound of laughter fills the air as children play.,
+I find peace and calm in nature's beauty.,
+The evening sky is painted with hues of orange and pink.
 """
 
 # Create a vocabulary of unique characters
@@ -18,7 +29,7 @@ idx2char = np.array(vocab)
 text_as_int = np.array([char2idx[c] for c in text])
 
 # Define the maximum length of a sequence for training
-seq_length = 10
+seq_length = 5
 examples_per_epoch = len(text) // (seq_length + 1)
 
 # Create training examples and targets
@@ -36,18 +47,18 @@ def split_input_target(chunk):
 dataset = sequences.map(split_input_target)
 
 # Batch size
-BATCH_SIZE = 64
+BATCH_SIZE = 16
 # Buffer size to shuffle the dataset
 BUFFER_SIZE = 10000
-EPOCHS = 10
+EPOCHS = 2
 
 dataset = dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE, drop_remainder=True)
 dataset = dataset.repeat()
 
 # Define the model
 vocab_size = len(vocab)
-embedding_dim = 256
-rnn_units = 1024
+embedding_dim = 64
+rnn_units = 256
 
 def build_model(vocab_size, embedding_dim, rnn_units, batch_size):
     model = tf.keras.Sequential([
