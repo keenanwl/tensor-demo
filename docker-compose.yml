@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  tensorflow-gpu:
+    build: .  # Build the Dockerfile in the current directory
+    container_name: tensorflow_gpu_container
+    volumes:
+      - ./nn.py:/app/nn.py           # Mount nn.py into /app/nn.py in the container
+      - ./data:/app/data             # Mount the local data directory to /app/data in the container
+    working_dir: /app                # Set working directory inside the container
+    command: python3 nn.py           # Run the nn.py script
+    ports:
+      - "8888:8888"                  # Expose port 8888
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]    # Request GPU support
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all   # Make all GPUs visible to the container
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+# docker-compose up --build
