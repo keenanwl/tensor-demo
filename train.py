@@ -1,3 +1,5 @@
+# Modified from https://f-a.nz/dev/develop-your-own-llm-like-chatgpt-with-tensorflow-and-keras/
+
 import numpy as np
 import tensorflow as tf
 
