@@ -1,5 +1,5 @@
 # tensor-demo
-A demo project for verify the following tech stack
+A demo project for verifying the following tech stack:
 * React
 * Python/Flask API
 * Python/TensorFlow model training
