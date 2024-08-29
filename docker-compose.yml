@@ -3,9 +3,9 @@ services:
     build: .  # Build the Dockerfile in the current directory
     container_name: tensorflow_gpu_container
     volumes:
-      - ./nn.py:/app/nn.py           # Mount nn.py into /app/nn.py in the container
-      - ./data:/app/data             # Mount the local data directory to /app/data in the container
-    working_dir: /app                # Set working directory inside the container
+      - ./train.py:/app/train.py
+      - ./data.py:/app/data.py
+    working_dir: /app
     command: /bin/bash
     stdin_open: true # docker run -i
     tty: true

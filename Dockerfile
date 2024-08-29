@@ -8,5 +8,5 @@ RUN apt-get update && apt-get install -y nano
 WORKDIR /app
 
 # Copy the nn.py script and data directory into the container
-COPY nn.py /app/nn.py
+COPY nn.py /app/train.py
 COPY data /app/data

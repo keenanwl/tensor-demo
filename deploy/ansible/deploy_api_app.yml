@@ -1,0 +1,137 @@
+---
+- name: Deploy Tensor Demo
+  hosts: webservers
+  become: yes
+  vars:
+    app_name: tensor-demo
+    app_directory: "/var/tensor-demo/{{ app_name }}"
+    venv_path: "{{ app_directory }}/venv"
+    python_version: python3
+    frontend_src: "../../frontend/tensor-demo/build"
+    frontend_dest: "/var/tensor-demo/{{ app_name }}/frontend"
+
+  tasks:
+    - name: Update and upgrade Ubuntu
+      apt:
+        upgrade: yes
+        update_cache: yes
+
+    - name: Install Python and pip
+      apt:
+        name:
+          - "{{ python_version }}"
+          - "{{ python_version }}-pip"
+          - "{{ python_version }}-venv"
+        state: present
+
+    - name: Create project directory
+      file:
+        path: "{{ app_directory }}"
+        state: directory
+        mode: '0755'
+
+    - name: Create frontend directory
+      file:
+        path: "{{ frontend_dest }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy Python backend files to server
+      copy:
+        src: "{{ item }}"
+        dest: "{{ app_directory }}/"
+        mode: '0644'
+      with_items:
+        - ../../serve.py
+        - ../../data.py
+        - ../../gunicorn_config.py
+        - ../../requirements.txt
+
+    - name: Copy built React app to server
+      synchronize:
+        src: "{{ frontend_src }}/"
+        dest: "{{ frontend_dest }}"
+        delete: yes
+        recursive: yes
+
+    - name: Create virtual environment
+      command: "{{ python_version }} -m venv {{ venv_path }}"
+      args:
+        creates: "{{ venv_path }}"
+
+    - name: Install Python packages from requirements file
+      pip:
+        requirements: "{{ app_directory }}/requirements.txt"
+        virtualenv: "{{ venv_path }}"
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Configure Nginx
+      template:
+        src: templates/nginx_config.j2
+        dest: /etc/nginx/sites-available/{{ app_name }}
+      notify: Restart Nginx
+
+    - name: Enable Nginx site
+      file:
+        src: /etc/nginx/sites-available/{{ app_name }}
+        dest: /etc/nginx/sites-enabled/{{ app_name }}
+        state: link
+      notify: Restart Nginx
+
+    - name: Create Gunicorn systemd service
+      template:
+        src: templates/gunicorn.service.j2
+        dest: /etc/systemd/system/{{ app_name }}.service
+      notify: Restart Gunicorn
+
+    - name: Ensure Gunicorn service is started and enabled
+      systemd:
+        name: "{{ app_name }}"
+        state: started
+        enabled: yes
+
+    - name: Install UFW
+      apt:
+        name: ufw
+        state: present
+
+    - name: Configure UFW defaults
+      ufw:
+        default: deny
+        direction: incoming
+        logging: on
+
+    - name: Allow SSH
+      ufw:
+        rule: allow
+        port: '22'
+
+    - name: Allow HTTP
+      ufw:
+        rule: allow
+        port: '80'
+
+    - name: Allow HTTPS
+      ufw:
+        rule: allow
+        port: '443'
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+
+  handlers:
+    - name: Restart Nginx
+      systemd:
+        name: nginx
+        state: restarted
+
+    - name: Restart Gunicorn
+      systemd:
+        name: "{{ app_name }}"
+        state: restarted
+        daemon_reload: yes

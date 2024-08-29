@@ -1,0 +1,17 @@
+[Unit]
+Description=Gunicorn instance to serve {{ app_name }}
+After=network.target
+
+[Service]
+User={{ ansible_user }}
+Group=www-data
+WorkingDirectory={{ app_directory }}
+Environment="PATH={{ venv_path }}/bin"
+ExecStart={{ venv_path }}/bin/gunicorn -c gunicorn_config.py serve:create_app()
+# Hardcoded for demo
+Environment="DEFAULT_SERVER_IP=188.166.201.96:8501"
+StandardOutput=append:/var/log/gunicorn/access.log
+StandardError=append:/var/log/gunicorn/error.log
+
+[Install]
+WantedBy=multi-user.target
