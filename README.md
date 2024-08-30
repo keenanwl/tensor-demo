@@ -17,7 +17,7 @@ For demo purposes only: there are several security issues.
 2. Copy the saved model to the host (container ID: `docker ps`) `docker cp <container_id>:/app/saved_model ./`
 3. Version the model `mkdir -p ./demo_model_server/1 && cp ./saved_model ./demo_model_server/1`
 4. Serve locally with TensorFlow Serving
-`dockerun -it --rm -p 8501:8501 -v ./demo_model_server:/models/model tensorflow/serving:latest --build`
+`docker run -it --rm -p 8501:8501 -v ./demo_model_server:/models/model tensorflow/serving:latest --build`
 5. Running at: `http://localhost:8501/v1/models/model:predict` 
 
 ### Run the API server [Locally]
